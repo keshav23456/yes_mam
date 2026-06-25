@@ -1,0 +1,671 @@
+<!doctype html>
+<html lang="en">
+<head>
+<script data-lemma-runtime-config>window.__LEMMA_CONFIG__={"podId": "", "apiUrl": "https://api.lemma.work", "authUrl": "https://lemma.work/auth"};</script>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>YesMadam · Partner Operations Desk</title>
+  <style>
+    :root {
+      --bg: #faf7f1;
+      --surface: #ffffff;
+      --surface-2: #f4ede1;
+      --ink: #1c1d22;
+      --ink-2: #54545c;
+      --ink-3: #8d8d96;
+      --border: #e6dec9;
+      --border-strong: #c9bda0;
+      --accent: #b14b61;          /* yesmadam-rose */
+      --accent-soft: #f7e1e6;
+      --warn: #c97a1f;
+      --warn-soft: #fcecd0;
+      --bad: #b8302d;
+      --bad-soft: #fadcdc;
+      --good: #2e7d51;
+      --good-soft: #d6ecdf;
+      --shadow: 0 1px 0 rgba(28,29,34,0.05), 0 6px 24px rgba(28,29,34,0.06);
+      --r-sm: 6px; --r-md: 10px; --r-lg: 14px;
+    }
+    * { box-sizing: border-box; }
+    html, body { height: 100%; }
+    body {
+      margin: 0; font: 14px/1.45 ui-sans-serif, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      color: var(--ink); background: var(--bg);
+      -webkit-font-smoothing: antialiased;
+    }
+    header.top {
+      display: flex; align-items: center; gap: 16px;
+      padding: 14px 22px; background: var(--surface);
+      border-bottom: 1px solid var(--border);
+    }
+    header.top .brand {
+      display: flex; align-items: center; gap: 10px; font-weight: 700; letter-spacing: 0.02em;
+    }
+    header.top .brand .mark {
+      width: 28px; height: 28px; border-radius: 50%;
+      background: linear-gradient(135deg, #b14b61, #e09ab0);
+      display: grid; place-items: center; color: #fff; font-size: 13px;
+    }
+    header.top h1 { margin: 0; font-size: 16px; font-weight: 700; }
+    header.top .crumb { color: var(--ink-3); font-size: 12px; }
+    header.top .counts {
+      margin-left: auto; display: flex; gap: 18px;
+      font-size: 12px; color: var(--ink-2);
+    }
+    header.top .counts b { display: block; font-size: 18px; color: var(--ink); font-weight: 700; }
+    main.layout {
+      display: grid;
+      grid-template-columns: 280px minmax(0, 1fr) 400px;
+      gap: 18px; padding: 18px; height: calc(100vh - 64px);
+    }
+    .panel {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--r-lg); box-shadow: var(--shadow);
+      display: flex; flex-direction: column; min-height: 0;
+    }
+    .panel > header {
+      padding: 12px 16px; border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; gap: 8px;
+    }
+    .panel > header h2 {
+      margin: 0; font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em;
+      color: var(--ink-2);
+    }
+    .panel > header .badge {
+      margin-left: auto; font-size: 11px; padding: 2px 7px; border-radius: 999px;
+      background: var(--accent-soft); color: var(--accent); font-weight: 600;
+    }
+    .panel .body { padding: 14px 16px; overflow: auto; min-height: 0; flex: 1; }
+
+    /* Alerts panel */
+    .alerts .kpi-grid {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px;
+    }
+    .alerts .kpi {
+      padding: 12px; border-radius: var(--r-md);
+      background: var(--surface-2); border: 1px solid var(--border);
+    }
+    .alerts .kpi.is-bad   { background: var(--bad-soft); border-color: #e9b8b6; }
+    .alerts .kpi.is-warn  { background: var(--warn-soft); border-color: #ecc993; }
+    .alerts .kpi .label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--ink-2); }
+    .alerts .kpi .num    { font-size: 28px; font-weight: 700; line-height: 1; margin-top: 4px; }
+    .alerts .group { margin-top: 14px; }
+    .alerts .group h3 {
+      margin: 0 0 6px; font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em;
+      color: var(--ink-3);
+    }
+    .alerts .group .row {
+      display: grid; grid-template-columns: 1fr auto; gap: 10px;
+      padding: 8px 10px; border: 1px solid transparent; border-radius: var(--r-md);
+      cursor: pointer;
+    }
+    .alerts .group .row:hover { background: var(--surface-2); border-color: var(--border); }
+    .alerts .group .row .name { font-weight: 600; }
+    .alerts .group .row .meta { font-size: 11px; color: var(--ink-3); }
+    .alerts .group .row .stat {
+      align-self: center; font-size: 11px; padding: 2px 7px; border-radius: 999px;
+      background: var(--bad-soft); color: var(--bad); font-weight: 700;
+    }
+    .alerts .empty { color: var(--ink-3); font-size: 12px; padding: 8px 4px; }
+
+    /* Table panel */
+    .table-panel .toolbar {
+      padding: 10px 16px; display: flex; gap: 8px; flex-wrap: wrap;
+      border-bottom: 1px solid var(--border); background: var(--surface-2);
+    }
+    .table-panel .toolbar select,
+    .table-panel .toolbar input {
+      font: inherit; padding: 6px 10px; border: 1px solid var(--border-strong);
+      background: var(--surface); border-radius: var(--r-sm); color: var(--ink);
+    }
+    .table-panel .toolbar .search { flex: 1; min-width: 180px; }
+    .table-panel .toolbar .count  { margin-left: auto; font-size: 12px; color: var(--ink-2); align-self: center; }
+
+    table.partners {
+      width: 100%; border-collapse: collapse; font-size: 13px;
+    }
+    table.partners thead th {
+      position: sticky; top: 0; background: var(--surface);
+      text-align: left; font-size: 11px; text-transform: uppercase;
+      letter-spacing: 0.06em; color: var(--ink-2);
+      padding: 10px 12px; border-bottom: 1px solid var(--border);
+    }
+    table.partners tbody td { padding: 10px 12px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+    table.partners tbody tr:hover { background: var(--surface-2); }
+    table.partners .name     { font-weight: 600; }
+    table.partners .muted     { color: var(--ink-3); }
+    table.partners .num       { text-align: right; font-variant-numeric: tabular-nums; }
+    table.partners .actions   { text-align: right; }
+    table.partners .pill {
+      display: inline-block; font-size: 11px; padding: 2px 8px; border-radius: 999px;
+      font-weight: 600; letter-spacing: 0.02em;
+    }
+    .pill.active        { background: var(--good-soft); color: var(--good); }
+    .pill.under_review  { background: var(--warn-soft); color: var(--warn); }
+    .pill.suspended     { background: var(--bad-soft);  color: var(--bad); }
+    .pill.inactive      { background: #ece6d6; color: var(--ink-2); }
+    .pill.valid         { background: var(--good-soft); color: var(--good); }
+    .pill.expiring_soon { background: var(--warn-soft); color: var(--warn); }
+    .pill.expired       { background: var(--bad-soft);  color: var(--bad); }
+
+    button.flag-btn {
+      font: inherit; font-size: 12px; font-weight: 600; color: var(--accent);
+      background: transparent; border: 1px solid var(--accent-soft);
+      padding: 4px 10px; border-radius: 999px; cursor: pointer;
+    }
+    button.flag-btn:hover { background: var(--accent-soft); }
+    button.flag-btn:disabled { color: var(--ink-3); border-color: var(--border); cursor: default; }
+
+    /* Chat panel */
+    .chat-panel .body { padding: 0; display: flex; flex-direction: column; }
+    .chat-panel .body .intro {
+      padding: 12px 16px; background: var(--surface-2); border-bottom: 1px solid var(--border);
+      font-size: 12px; color: var(--ink-2);
+    }
+    .chat-panel .body .intro b { color: var(--ink); }
+    .chat-panel .body .intro .chips { margin-top: 8px; display: flex; flex-wrap: wrap; gap: 6px; }
+    .chat-panel .body .intro .chip {
+      font: inherit; font-size: 12px; padding: 4px 10px; border-radius: 999px;
+      background: var(--surface); border: 1px solid var(--border-strong); cursor: pointer;
+      color: var(--ink);
+    }
+    .chat-panel .body .intro .chip:hover { background: var(--accent-soft); border-color: var(--accent); color: var(--accent); }
+
+    /* Override lemma-ui thread bounding to fill the column */
+    lemma-agent-thread { flex: 1; min-height: 0; }
+    lemma-agent-thread::part(scroll) { max-height: none; }
+
+    .loading-overlay {
+      position: fixed; inset: 0; display: grid; place-items: center;
+      background: var(--bg); z-index: 50;
+      color: var(--ink-2); font-size: 13px;
+    }
+    .err {
+      padding: 14px; margin: 14px; border: 1px solid var(--bad);
+      background: var(--bad-soft); color: var(--bad); border-radius: var(--r-md);
+    }
+
+    @media (max-width: 1100px) {
+      main.layout { grid-template-columns: 240px minmax(0, 1fr); grid-template-rows: 1fr 360px; }
+      .chat-panel { grid-column: 1 / span 2; grid-row: 2; }
+    }
+    @media (max-width: 760px) {
+      main.layout { grid-template-columns: 1fr; grid-template-rows: auto auto auto; height: auto; }
+      .chat-panel { grid-column: 1; grid-row: 3; min-height: 400px; }
+    }
+  </style>
+</head>
+<body>
+  <div id="errbox" hidden></div>
+
+  <header class="top" id="topbar">
+    <div class="brand">
+      <div class="mark">Y</div>
+      <div>
+        <h1>Partner Operations Desk</h1>
+        <div class="crumb">YesMadam · operations <span id="connLine">· <span id="connDot" style="display:inline-block;width:7px;height:7px;border-radius:50%;background:#aaa;vertical-align:middle"></span> <span id="connText">connecting…</span></span></div>
+      </div>
+    </div>
+    <div class="counts" id="counts">
+      <div><b id="cntTotal">…</b> partners</div>
+      <div><b id="cntActive">…</b> active</div>
+      <div><b id="cntReview">…</b> under review</div>
+      <div><b id="cntCities">…</b> cities</div>
+    </div>
+  </header>
+
+  <main class="layout" id="layout">
+    <!-- Alerts -->
+    <section class="panel alerts">
+      <header>
+        <h2>Alerts</h2>
+        <span class="badge" id="alertsBadge">live</span>
+      </header>
+      <div class="body">
+        <div class="kpi-grid">
+          <div class="kpi" id="kpiHighComplaints">
+            <div class="label">High complaints</div>
+            <div class="num">—</div>
+          </div>
+          <div class="kpi" id="kpiExpiredCert">
+            <div class="label">Expired certs</div>
+            <div class="num">—</div>
+          </div>
+        </div>
+        <div class="group">
+          <h3>Needs attention</h3>
+          <div id="alertsList"><div class="empty">Loading…</div></div>
+        </div>
+        <div id="authBanner" style="display:none;padding:10px 14px;margin-top:8px;border:1px dashed var(--border-strong);
+             border-radius:var(--r-md);font-size:12px;color:var(--ink-2);background:var(--surface-2);">
+          Realtime chat isn't loaded yet. <button id="signinBtn" class="chip" style="margin-left:6px">Sign in</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Partners table -->
+    <section class="panel table-panel">
+      <header>
+        <h2>Partners</h2>
+      </header>
+      <div class="toolbar">
+        <select id="filterCity"><option value="">All cities</option></select>
+        <select id="filterStatus">
+          <option value="">All statuses</option>
+          <option value="active">Active</option>
+          <option value="under_review">Under review</option>
+          <option value="suspended">Suspended</option>
+          <option value="inactive">Inactive</option>
+        </select>
+        <input id="search" class="search" placeholder="Search name, city, notes…" />
+        <span class="count" id="rowCount">0 partners</span>
+      </div>
+      <div class="body" style="padding:0">
+        <table class="partners">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>City</th>
+              <th>Status</th>
+              <th class="num">Complaints</th>
+              <th>Certification</th>
+              <th class="num">Rating</th>
+              <th class="num">Bookings / mo</th>
+              <th class="actions"></th>
+            </tr>
+          </thead>
+          <tbody id="rows"><tr><td colspan="8" class="muted" style="padding:18px">Loading…</td></tr></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Chat -->
+    <section class="panel chat-panel">
+      <header>
+        <h2>Partner Ops Assistant</h2>
+        <span class="badge" id="chatBadge">loading…</span>
+      </header>
+      <div class="body">
+        <div class="intro">
+          <b>Ask the assistant.</b> It can query the roster and flag partners for review.
+          <div class="chips" id="suggestions">
+            <button class="chip" data-q="Show partners in Mumbai with complaints over 3">Mumbai · complaints > 3</button>
+            <button class="chip" data-q="Top 5 partners by complaints count across all cities">Top 5 complaints</button>
+            <button class="chip" data-q="List all partners with expired certifications">Expired certs</button>
+            <button class="chip" data-q="How is the team doing this week?">Team summary</button>
+          </div>
+        </div>
+        <div id="chatMount" style="flex:1;min-height:0;display:flex">
+          <div style="margin:auto;color:var(--ink-3);font-size:12px;padding:18px;text-align:center">
+            Chat with the assistant loads once you're signed in.<br>
+            <button id="signinBtn2" class="chip" style="margin-top:8px">Sign in</button>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+<script>
+/* ============================================================
+   YesMadam Partner Operations Desk — zero-config, render-first.
+   - Reads ?pod=<podId>&api=<apiUrl>&auth=<authUrl> to override config.
+   - Pulls data directly via fetch() using localStorage["lemma_token"].
+   - Mounts the SDK chat widget opportunistically when auth is ready.
+   ============================================================ */
+(function () {
+  "use strict";
+
+  /* ---------- 1. Resolve config from URL params + embedded script ---------- */
+  var cfg = window.__LEMMA_CONFIG__ || {};
+  var qs = new URLSearchParams(window.location.search);
+  if (qs.get("pod"))  cfg.podId   = qs.get("pod");
+  if (qs.get("api"))  cfg.apiUrl  = qs.get("api").replace(/\/$/, "");
+  if (qs.get("auth")) cfg.authUrl = qs.get("auth").replace(/\/$/, "");
+  if (!cfg.apiUrl)  cfg.apiUrl  = "https://api.lemma.work";
+  if (!cfg.authUrl) cfg.authUrl = "https://lemma.work/auth";
+  window.__LEMMA_CONFIG__ = cfg;
+
+  /* ---------- 2. Connection indicator ---------- */
+  var connDot  = document.getElementById("connDot");
+  var connText = document.getElementById("connText");
+  var alertsBadge = document.getElementById("alertsBadge");
+  var chatBadge   = document.getElementById("chatBadge");
+
+  function setConn(state, label) {
+    var colors = { connecting: "#f6a623", live: "#36b37e", auth: "#999", error: "#de350b" };
+    if (connDot)  connDot.style.background  = colors[state] || "#aaa";
+    if (connText) connText.textContent = label || state;
+    if (alertsBadge) {
+      alertsBadge.textContent = state === "live" ? "live"
+        : state === "auth" ? "auth needed"
+        : state === "error" ? "error" : "connecting";
+      alertsBadge.style.background =
+        state === "live" ? "var(--good-soft)"
+        : state === "error" ? "var(--bad-soft)"
+        : "var(--surface-2)";
+      alertsBadge.style.color =
+        state === "live" ? "var(--good)"
+        : state === "error" ? "var(--bad)"
+        : "var(--ink-2)";
+    }
+  }
+
+  /* ---------- 3. Direct REST fetcher using token from localStorage ---------- */
+  function getToken() {
+    try { return localStorage.getItem("lemma_token") || sessionStorage.getItem("lemma_token"); }
+    catch (_) { return null; }
+  }
+
+  async function fetchTable(tableName, opts) {
+    opts = opts || {};
+    var url = cfg.apiUrl + "/pods/" + encodeURIComponent(cfg.podId)
+            + "/datastore/tables/" + encodeURIComponent(tableName) + "/records?limit=200";
+    var token = getToken();
+    var headers = { "Accept": "application/json" };
+    if (token) headers["Authorization"] = "Bearer " + token;
+    var resp = await fetch(url, { headers: headers, signal: opts.signal });
+    if (resp.status === 401) {
+      var err = new Error("unauthorized"); err.code = 401; throw err;
+    }
+    if (!resp.ok) {
+      var text = await resp.text().catch(function () { return ""; });
+      var err2 = new Error("API " + resp.status + ": " + text.slice(0, 200)); err2.code = resp.status; throw err2;
+    }
+    var data = await resp.json();
+    return data.items || [];
+  }
+
+  /* ---------- 4. Page state ---------- */
+  var ALL   = [];
+  var FLAGS = [];
+
+  /* ---------- 5. Rendering helpers (identical look to the deployed version) ---------- */
+  function escape(s) {
+    return String(s == null ? "" : s)
+      .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;").replace(/'/g, "&#39;");
+  }
+  function labelStatus(s) { return ({
+    active: "Active", under_review: "Under review", suspended: "Suspended", inactive: "Inactive"
+  })[s] || (s || "—"); }
+  function labelCert(s) { return ({
+    valid: "Valid", expiring_soon: "Expiring soon", expired: "Expired"
+  })[s] || (s || "—"); }
+  function highComplaintsClass(n) {
+    var v = n || 0;
+    if (v >= 5) return "bad";
+    if (v >= 3) return "warn";
+    return "";
+  }
+  function formatRating(r) {
+    var v = Number(r || 0); return v ? v.toFixed(1) : "—";
+  }
+  function daysUntil(dateStr) {
+    var ms = new Date(dateStr).getTime() - Date.now();
+    return Math.round(ms / 86400000);
+  }
+
+  function renderTopCounts() {
+    var total = ALL.length;
+    var active = ALL.filter(function (p) { return p.status === "active"; }).length;
+    var flagged = ALL.filter(function (p) { return p.status === "under_review"; }).length;
+    var cities = new Set(ALL.map(function (p) { return (p.city || "").toLowerCase(); }).filter(Boolean)).size;
+    document.getElementById("cntTotal").textContent  = total;
+    document.getElementById("cntActive").textContent = active;
+    document.getElementById("cntReview").textContent = flagged;
+    document.getElementById("cntCities").textContent = cities;
+  }
+
+  function renderAlerts() {
+    var high = ALL.filter(function (p) { return (p.complaints_count || 0) >= 5; });
+    var expiredOrSoon = ALL.filter(function (p) {
+      return p.certification_status === "expired"
+        || (p.certification_expires_at && daysUntil(p.certification_expires_at) <= 30);
+    });
+
+    document.getElementById("kpiHighComplaints").classList.toggle("is-bad", high.length > 0);
+    document.getElementById("kpiExpiredCert").classList.toggle("is-warn", expiredOrSoon.length > 0);
+    document.querySelector("#kpiHighComplaints .num").textContent = high.length;
+    document.querySelector("#kpiExpiredCert .num").textContent = expiredOrSoon.length;
+
+    var attention = []
+      .concat(high.map(function (p) { return Object.assign({ _reason: p.complaints_count + " complaints" }, p); }))
+      .concat(ALL.filter(function (p) { return p.status === "under_review"; })
+                   .map(function (p) { return Object.assign({ _reason: "Under review" }, p); }))
+      .concat(ALL.filter(function (p) { return p.certification_status === "expired"; })
+                   .map(function (p) { return Object.assign({ _reason: "Cert expired" }, p); }))
+      .slice(0, 12);
+
+    var list = document.getElementById("alertsList");
+    if (!attention.length) {
+      list.innerHTML = '<div class="empty">Nothing on fire. 💆</div>';
+      list.querySelectorAll && list.querySelectorAll(".row").forEach(function () {}); // noop
+    } else {
+      list.innerHTML = attention.map(function (p) {
+        return ''
+          + '<div class="row" data-id="' + p.id + '" data-name="' + escape(p.name) + '" '
+          + 'title="' + escape(p.city) + ' · ' + escape(p._reason) + '">'
+          +   '<div><div class="name">' + escape(p.name) + '</div>'
+          +        '<div class="meta">' + escape(p.city) + '</div></div>'
+          +   '<div class="stat">' + escape(String(p._reason)) + '</div>'
+          + '</div>';
+      }).join("");
+      list.querySelectorAll(".row").forEach(function (row) {
+        row.addEventListener("click", function () {
+          var name = row.getAttribute("data-name");
+          var stat = row.querySelector(".stat").textContent;
+          sendToAgent("Flag " + name + " for review — see alerts panel (" + stat + "). Ask me to confirm before writing.");
+        });
+      });
+    }
+  }
+
+  function populateCityFilter() {
+    var cities = Array.from(new Set(ALL.map(function (p) { return (p.city || "").trim(); }).filter(Boolean))).sort();
+    var sel = document.getElementById("filterCity");
+    var cur = sel.value;
+    sel.innerHTML = '<option value="">All cities</option>'
+      + cities.map(function (c) { return '<option value="' + escape(c) + '">' + escape(c) + '</option>'; }).join("");
+    if (cities.indexOf(cur) >= 0) sel.value = cur;
+  }
+
+  function renderRows() {
+    var city = document.getElementById("filterCity").value.toLowerCase();
+    var status = document.getElementById("filterStatus").value;
+    var q = document.getElementById("search").value.trim().toLowerCase();
+    var rows = ALL.filter(function (p) {
+      if (city && (p.city || "").toLowerCase() !== city) return false;
+      if (status && p.status !== status) return false;
+      if (q) {
+        var hay = (p.name + " " + p.city + " " + (p.notes || "")).toLowerCase();
+        if (hay.indexOf(q) < 0) return false;
+      }
+      return true;
+    });
+    document.getElementById("rowCount").textContent =
+      rows.length + " of " + ALL.length + " partner" + (ALL.length === 1 ? "" : "s");
+
+    var tbody = document.getElementById("rows");
+    if (!rows.length) {
+      tbody.innerHTML = '<tr><td colspan="8" class="muted" style="padding:18px">No partners match these filters.</td></tr>';
+      return;
+    }
+    tbody.innerHTML = rows.map(function (p) {
+      return ''
+        + '<tr data-id="' + p.id + '">'
+        + '<td class="name">' + escape(p.name) + '</td>'
+        + '<td>' + escape(p.city || "—") + '</td>'
+        + '<td><span class="pill ' + p.status + '">' + labelStatus(p.status) + '</span></td>'
+        + '<td class="num ' + highComplaintsClass(p.complaints_count) + '">' + (p.complaints_count || 0) + '</td>'
+        + '<td><span class="pill ' + p.certification_status + '">' + labelCert(p.certification_status) + '</span>'
+        +   (p.certification_expires_at
+              ? '<span class="muted" style="font-size:11px"> · ' + String(p.certification_expires_at).slice(0, 10) + '</span>'
+              : "")
+        + '</td>'
+        + '<td class="num">' + formatRating(p.rating) + '</td>'
+        + '<td class="num">' + (p.bookings_this_month || 0) + '</td>'
+        + '<td class="actions">' + flagButton(p) + '</td>'
+        + '</tr>';
+    }).join("");
+    tbody.querySelectorAll(".flag-btn").forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        sendToAgent("Flag " + btn.getAttribute("data-name") + " for review — high complaints. Ask me to confirm before writing.");
+      });
+    });
+  }
+
+  function flagButton(p) {
+    var locked = (p.status === "suspended" || p.status === "inactive");
+    return '<button class="flag-btn" data-name="' + escape(p.name) + '" '
+      + (locked ? "disabled title='Partner is suspended/inactive — review manually'" : "")
+      + '>Flag</button>';
+  }
+
+  function wireFilters() {
+    ["filterCity", "filterStatus"].forEach(function (id) {
+      document.getElementById(id).addEventListener("change", renderRows);
+    });
+    var t = null;
+    document.getElementById("search").addEventListener("input", function () {
+      clearTimeout(t); t = setTimeout(renderRows, 120);
+    });
+  }
+
+  /* ---------- 6. Agent chat ---------- */
+  var sdkMounted = false;
+  function sendToAgent(text) {
+    var thread = document.querySelector("lemma-agent-thread");
+    if (thread && typeof thread.send === "function") { thread.send(text); return; }
+    // No SDK yet — prompt to sign in.
+    showAuthBanner();
+    alert("Sign in (top-right) to send that to the assistant:\n\n" + text);
+  }
+
+  function showAuthBanner() {
+    var b = document.getElementById("authBanner");
+    if (b) b.style.display = "block";
+  }
+
+  async function tryMountAgent() {
+    if (sdkMounted) return;
+    var token = getToken();
+    if (!token) {
+      chatBadge.textContent = "sign in to chat";
+      return;
+    }
+    try {
+      // Quick liveness check on /users/me — confirms the token before pulling the SDK.
+      var me = await fetch(cfg.apiUrl + "/users/me", { headers: { Authorization: "Bearer " + token } });
+      if (!me.ok) { chatBadge.textContent = "auth expired"; return; }
+      sdkMounted = true;
+      chatBadge.textContent = "online";
+
+      // Inject <lemma-agent-thread> from the SDK web component.
+      var mount = document.getElementById("chatMount");
+      mount.innerHTML = '<lemma-agent-thread agent="partner-ops-agent"></lemma-agent-thread>';
+      // Load SDK UI components if not already loaded.
+      if (!window.LemmaClient) {
+        await loadScript(cfg.apiUrl + "/public/sdk/lemma-client.js");
+        await loadScript(cfg.apiUrl + "/public/sdk/lemma-ui.js");
+      }
+      // Wire suggestion chips (they re-emit on each new thread).
+      wireSuggestions();
+    } catch (e) {
+      chatBadge.textContent = "chat offline";
+      console.warn("agent mount failed:", e);
+    }
+  }
+
+  function loadScript(src) {
+    return new Promise(function (resolve, reject) {
+      var s = document.createElement("script");
+      s.src = src; s.onload = function () { resolve(); };
+      s.onerror = function () { reject(new Error("script load failed: " + src)); };
+      document.head.appendChild(s);
+    });
+  }
+
+  function wireSuggestions() {
+    document.querySelectorAll("#suggestions .chip").forEach(function (btn) {
+      btn.onclick = function () { sendToAgent(btn.getAttribute("data-q")); };
+    });
+  }
+
+  /* Sign-in button (any [id^=signinBtn]) */
+  function bindSignIn() {
+    document.querySelectorAll('[id^="signinBtn"]').forEach(function (b) {
+      b.addEventListener("click", function () {
+        var ret = encodeURIComponent(window.location.href);
+        window.location.href = cfg.authUrl + "?redirect=" + ret;
+      });
+    });
+  }
+
+  /* ---------- 7. Pull data and render at once. ---------- */
+  async function refresh() {
+    if (!cfg.podId) {
+      setConn("error", "no pod id");
+      showErr("Append ?pod=<podId> to the URL — e.g. "
+              + window.location.pathname + "?pod=019ef813-ad27-7435-aa76-5a19c12dc7e7");
+      return;
+    }
+    try {
+      var token = getToken();
+      if (!token) {
+        // Try one more place: the SDK sometimes puts a cookie or the running app
+        // exposes a session. If still missing, render an empty table with a CTA.
+      }
+      var partners = await fetchTable("partners");
+      ALL = partners.slice().sort(function (a, b) {
+        return (b.complaints_count || 0) - (a.complaints_count || 0);
+      });
+      try { FLAGS = await fetchTable("partner_flags"); } catch (_) { FLAGS = []; }
+
+      renderTopCounts();
+      renderAlerts();
+      populateCityFilter();
+      renderRows();
+
+      setConn("live", "live · " + ALL.length + " partners");
+      // Hide any lingering error.
+      var box = document.getElementById("errbox");
+      if (box) box.hidden = true;
+    } catch (e) {
+      if (e.code === 401) {
+        setConn("auth", "auth needed");
+        showAuthBanner();
+        renderTopCounts(); // zeros
+        renderAlerts();    // "nothing on fire" / kpis at —
+      } else {
+        setConn("error", "error");
+        showErr("Couldn't load partners: " + (e.message || String(e)));
+      }
+    }
+  }
+
+  function showErr(text) {
+    var box = document.getElementById("errbox");
+    if (!box) return;
+    box.hidden = false;
+    box.className = "err";
+    box.textContent = text;
+  }
+
+  /* ---------- 8. Boot ---------- */
+  setConn("connecting", "connecting…");
+  bindSignIn();
+  wireFilters();
+  wireSuggestions();
+  refresh();                    // direct fetch — works even before SDK auth.
+  tryMountAgent();              // opportunistic: chat when token is present.
+
+  // Light polling so the desk refreshes without the SDK watcher.
+  setInterval(refresh, 8000);
+
+  window.addEventListener("storage", function (e) {
+    if (e.key === "lemma_token") { refresh(); tryMountAgent(); }
+  });
+})();
+</script>
+</body>
+</html>
